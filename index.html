@@ -986,7 +986,15 @@ function getMonthBounds(offset=0){
   };
 }
 function fmt(n){ return Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,','); }
-function parseDate(s){ if(!s) return null; const d=new Date(s); return isNaN(d)?null:d; }
+function parseDate(s){
+  if(!s) return null;
+  // Handle DD/MM/YYYY or D/M/YYYY (Airtable format)
+  const dmy = String(s).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if(dmy) return new Date(parseInt(dmy[3]), parseInt(dmy[2])-1, parseInt(dmy[1]));
+  // Handle YYYY-MM-DD
+  const d = new Date(s);
+  return isNaN(d) ? null : d;
+}
 
 // ── AIRTABLE ───────────────────────────────────────────────
 async function fetchTable(tid){
