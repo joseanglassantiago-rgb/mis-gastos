@@ -1039,7 +1039,7 @@ function refreshSaldoDisplay(){
   if(input && sueldo>0 && parseFloat(input.value)!==sueldo) input.value = sueldo.toFixed(2);
 
   // Calculate gastado this month
-  function parseMI(r){ return parseFloat(String(r['monto']||r['monto texto']||'0').replace(/[^0-9.]/g,''))||0; }
+  function parseMI(r){ return parseFloat(String(r['monto']||r['monto texto']||r['Monto']||'0').replace(/[^0-9.,]/g,'').replace(',','.'))||0; }
   const b = getMonthBounds(mesOffsets.inter);
   const mesRec = allInter.filter(r=>{ const d=parseDate(r['Fecha de Transacción']); return d&&d>=b.start&&d<=b.end; });
   const gastado = mesRec.reduce((a,r)=>a+parseMI(r),0);
@@ -1090,6 +1090,10 @@ function renderDiners(){
 
   document.getElementById('mes-label-diners').textContent=label;
   document.getElementById('next-diners').disabled=off>=0;
+
+  console.log('[Diners] allDiners count:', allDiners.length);
+  console.log('[Diners] sample record:', allDiners[0]);
+  console.log('[Diners] mesOffset:', off, 'label:', label);
 
   // Filter by Mes (key) field = YYYY-MM, or fallback to Fecha Texto
   const mesKey = (() => { const b=getMonthBounds(off); return `${b.start.getFullYear()}-${String(b.start.getMonth()+1).padStart(2,'0')}`; })();
@@ -1322,6 +1326,7 @@ async function init(){
       fetchTable(CFG.diners),
       fetchTable(CFG.inter)
     ]);
+    console.log('[Init] Diners records:', allDiners.length, 'Inter records:', allInter.length);
     document.getElementById('loading-screen').style.display='none';
     document.getElementById('content').style.display='block';
     renderDiners();
