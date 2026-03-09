@@ -976,6 +976,47 @@ function getCiclo(ref=new Date()){
   }
   return {start,end,label};
 }
+// Diners: pago el 12 de cada mes
+// Antes del 12 -> ciclo = mes anterior. Despues del 12 -> ciclo = mes actual
+function getCicloDiners(ref=new Date()){
+  const y=ref.getFullYear(), m=ref.getMonth()+1;
+  const pay12=new Date(y,m-1,12);
+  let cm,cy;
+  if(ref<pay12){ cm=m===1?12:m-1; cy=m===1?y-1:y; }
+  else { cm=m; cy=y; }
+  const start=new Date(cy,cm-1,1), end=new Date(cy,cm,0);
+  const pm=cm===12?1:cm+1, py2=cm===12?cy+1:cy;
+  const pagoDate=new Date(py2,pm-1,12);
+  const daysLeft=Math.max(0,Math.ceil((pagoDate-ref)/86400000));
+  return {start,end,label:`${MONTHS[cm-1]} ${cy}`,pagoDate,daysLeft,
+    sueldoLabel:`Sueldo 25 ${MONTHS[cm-1]}`,
+    cicloKey:`${cy}-${String(cm).padStart(2,'0')}`};
+}
+
+// Interbank: pago el 25 (si domingo -> sabado 24)
+function getCicloInter(ref=new Date()){
+  let y=ref.getFullYear(), m=ref.getMonth()+1;
+  const pay=getPayDate(y,m);
+  let start,end,label;
+  if(ref<=pay){
+    const pm=m===1?12:m-1, py=m===1?y-1:y;
+    start=new Date(py,pm-1,26); end=pay;
+    label=`26 ${MONTHS[pm-1]} - 25 ${MONTHS[m-1]}`;
+  } else {
+    const nm=m===12?1:m+1, ny=m===12?y+1:y;
+    start=new Date(y,m-1,26); end=getPayDate(ny,nm);
+    label=`26 ${MONTHS[m-1]} - 25 ${MONTHS[nm-1]}`;
+  }
+  const daysLeft=Math.max(0,Math.ceil((end-ref)/86400000));
+  return {start,end,label,pagoDate:end,daysLeft};
+}
+
+// Parsear monto Diners con coma decimal ("16,0" -> 16.0)
+function parseMontoDiners(r){
+  const raw=String(r['Monto']||r['monto']||'0').trim().replace(',','.');
+  return parseFloat(raw)||0;
+}
+
 function getMonthBounds(offset=0){
   const now=new Date();
   const d=new Date(now.getFullYear(), now.getMonth()+offset, 1);
