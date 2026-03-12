@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -1006,7 +1007,7 @@ body {
     </div>
     <div class="field">
       <label>Table ID — Signatur_Interbank</label>
-      <input type="text" id="cfg-sig" placeholder="tblXXXXXXXXXXXXX">
+      <input type="text" id="cfg-sig" placeholder="tblVXHGiudcaUbajt">
     </div>
     <div class="modal-btns">
       <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
@@ -1018,7 +1019,7 @@ body {
 <script>
 // ── CONFIG ─────────────────────────────────────────────────
 const SK = 'mgcfg2';
-let CFG = { token:'', base:'appaRF3MY4N7SK354', diners:'tblEogYL9lcKlXLMB', inter:'tblKsxt1lVKlSCd4K', sig:'' };
+let CFG = { token:'', base:'appaRF3MY4N7SK354', diners:'tblEogYL9lcKlXLMB', inter:'tblKsxt1lVKlSCd4K', sig:'tblVXHGiudcaUbajt' };
 function loadCfg(){ try{ const s=sessionStorage.getItem(SK); if(s) CFG={...CFG,...JSON.parse(s)}; }catch(e){} }
 function saveCfg(){ sessionStorage.setItem(SK, JSON.stringify(CFG)); }
 function openModal(){
