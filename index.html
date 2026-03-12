@@ -27,6 +27,8 @@
   --shadow-sm: 0 2px 12px rgba(91,91,214,0.08);
   --diners: #5b5bd6;
   --inter: #e85b8a;
+  --signature: #0ea5a0;
+  --signature-light: #e6faf9;
 }
 
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -367,6 +369,9 @@ body {
 }
 .tx-avatar.diners { background: var(--purple-light); color: var(--purple); }
 .tx-avatar.inter { background: var(--pink-light); color: var(--inter); }
+.tx-avatar.signature { background: var(--signature-light); color: var(--signature); }
+.stat-icon-wrap.teal { background: var(--signature-light); }
+.stat-value.teal { color: var(--signature); }
 .tx-info { flex: 1; min-width: 0; }
 .tx-name {
   font-size: 14px;
@@ -681,6 +686,9 @@ body {
     <button class="nav-item" onclick="showPage('interbank', this)">
       <span class="nav-icon">🏦</span> Interbank
     </button>
+    <button class="nav-item" onclick="showPage('signature', this)">
+      <span class="nav-icon">✍️</span> Signature
+    </button>
   </div>
 
   <!-- MAIN CONTENT -->
@@ -873,6 +881,90 @@ body {
         </div>
       </div>
 
+      <!-- PAGE SIGNATURE INTERBANK -->
+      <div id="page-signature" class="page">
+        <div class="page-header">
+          <div class="page-title">Signature Interbank</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="mes-nav">
+              <button class="mes-btn" id="prev-sig" onclick="changeMes('signature',-1)">‹</button>
+              <div class="mes-label" id="mes-label-sig">—</div>
+              <button class="mes-btn" id="next-sig" onclick="changeMes('signature',1)" disabled>›</button>
+            </div>
+            <div class="live-badge"><div class="live-dot"></div> vivo</div>
+          </div>
+        </div>
+
+        <!-- HERO -->
+        <div class="hero-card" style="background:linear-gradient(135deg,#0b8a86 0%,#0ea5a0 50%,#2ec4b6 100%);box-shadow:0 12px 40px rgba(14,165,160,0.35)">
+          <div class="hero-label">TOTAL DEL MES</div>
+          <div class="hero-amount" id="total-amt-sig">S/ —</div>
+          <div class="hero-cycle" id="mes-info-sig">—</div>
+          <div class="hero-progress"><div class="hero-progress-bar" id="mes-bar-sig" style="width:0%"></div></div>
+          <div class="hero-footer">
+            <span>inicio del mes</span>
+            <span id="mes-end-sig">—</span>
+          </div>
+          <div class="hero-badge" id="mes-badge-sig">—</div>
+        </div>
+
+        <!-- STATS -->
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-icon-wrap teal">✍️</div>
+              <div class="stat-count" id="count-sig-mes">0 tx</div>
+            </div>
+            <div class="stat-label">Total del mes</div>
+            <div class="stat-value teal" id="total-sig-mes">S/ 0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-icon-wrap teal">💱</div>
+              <div class="stat-count" id="count-sig-moneda">—</div>
+            </div>
+            <div class="stat-label">Moneda principal</div>
+            <div class="stat-value teal" id="moneda-sig-mes">—</div>
+          </div>
+        </div>
+
+        <!-- CHARTS -->
+        <div class="two-col">
+          <div class="chart-card">
+            <div class="card-header">
+              <div class="card-title">Últimos 6 meses</div>
+              <div class="legend">
+                <div class="legend-item"><div class="legend-dot" style="background:var(--signature)"></div>Signature</div>
+              </div>
+            </div>
+            <div style="position:relative;height:160px;width:100%">
+              <canvas id="chart-sig-monthly"></canvas>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="card-header"><div class="card-title">Por moneda</div></div>
+            <div class="pie-wrap">
+              <canvas class="pie-canvas" id="chart-sig-pie"></canvas>
+              <div class="pie-labels" id="pie-sig-labels"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TOP COMERCIOS -->
+        <div class="one-col">
+          <div class="chart-card">
+            <div class="card-header"><div class="card-title">Top comercios del mes</div></div>
+            <div id="top-sig"></div>
+          </div>
+        </div>
+
+        <!-- TX -->
+        <div class="chart-card">
+          <div class="card-header"><div class="card-title">Movimientos</div></div>
+          <div class="tx-list" id="tx-sig"></div>
+        </div>
+      </div>
+
     </div><!-- /content -->
   </div>
 </div>
@@ -884,6 +976,9 @@ body {
   </button>
   <button class="mobile-nav-item" id="mob-interbank" onclick="showPage('interbank', this, true)">
     <span>🏦</span><span>Interbank</span>
+  </button>
+  <button class="mobile-nav-item" id="mob-signature" onclick="showPage('signature', this, true)">
+    <span>✍️</span><span>Signature</span>
   </button>
 </nav>
 
@@ -909,6 +1004,10 @@ body {
       <label>Table ID — Consumo Interbank</label>
       <input type="text" id="cfg-inter" placeholder="tblKsxt1lVKlSCd4K">
     </div>
+    <div class="field">
+      <label>Table ID — Signatur_Interbank</label>
+      <input type="text" id="cfg-sig" placeholder="tblXXXXXXXXXXXXX">
+    </div>
     <div class="modal-btns">
       <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
       <button class="btn-primary" onclick="saveConfig()">Guardar y cargar</button>
@@ -919,7 +1018,7 @@ body {
 <script>
 // ── CONFIG ─────────────────────────────────────────────────
 const SK = 'mgcfg2';
-let CFG = { token:'', base:'appaRF3MY4N7SK354', diners:'tblEogYL9lcKlXLMB', inter:'tblKsxt1lVKlSCd4K' };
+let CFG = { token:'', base:'appaRF3MY4N7SK354', diners:'tblEogYL9lcKlXLMB', inter:'tblKsxt1lVKlSCd4K', sig:'' };
 function loadCfg(){ try{ const s=sessionStorage.getItem(SK); if(s) CFG={...CFG,...JSON.parse(s)}; }catch(e){} }
 function saveCfg(){ sessionStorage.setItem(SK, JSON.stringify(CFG)); }
 function openModal(){
@@ -927,6 +1026,7 @@ function openModal(){
   document.getElementById('cfg-base').value=CFG.base;
   document.getElementById('cfg-diners').value=CFG.diners;
   document.getElementById('cfg-inter').value=CFG.inter;
+  document.getElementById('cfg-sig').value=CFG.sig;
   document.getElementById('modal').classList.add('open');
 }
 function closeModal(){ document.getElementById('modal').classList.remove('open'); }
@@ -935,6 +1035,7 @@ function saveConfig(){
   CFG.base=document.getElementById('cfg-base').value.trim();
   CFG.diners=document.getElementById('cfg-diners').value.trim();
   CFG.inter=document.getElementById('cfg-inter').value.trim();
+  CFG.sig=document.getElementById('cfg-sig').value.trim();
   saveCfg(); closeModal(); init();
 }
 
@@ -948,12 +1049,15 @@ function showPage(name, btn, isMobile=false){
   if(!isMobile){ btn.classList.add('active'); }
   else {
     document.querySelectorAll('.sidebar .nav-item').forEach(b=>{
-      if(b.textContent.includes(name==='diners'?'Diners':'Interbank')) b.classList.add('active');
+      if(name==='diners'&&b.textContent.includes('Diners')) b.classList.add('active');
+      if(name==='interbank'&&b.textContent.includes('Interbank')&&!b.textContent.includes('Signature')) b.classList.add('active');
+      if(name==='signature'&&b.textContent.includes('Signature')) b.classList.add('active');
     });
   }
   // mobile nav
   document.querySelectorAll('.mobile-nav-item').forEach(b=>b.classList.remove('active'));
-  const mob = document.getElementById('mob-'+(name==='diners'?'diners':'interbank'));
+  const mobId = name==='diners'?'mob-diners': name==='interbank'?'mob-interbank':'mob-signature';
+  const mob = document.getElementById(mobId);
   if(mob) mob.classList.add('active');
   currentPage = name;
 }
@@ -1110,8 +1214,8 @@ function refreshSaldoDisplay(){
 }
 
 // ── STATE (original) ──────────────────────────────────────
-let allDiners=[], allInter=[];
-let mesOffsets={diners:0, inter:0};
+let allDiners=[], allInter=[], allSig=[];
+let mesOffsets={diners:0, inter:0, signature:0};
 let charts={};
 
 function changeMes(which, dir){
@@ -1119,7 +1223,8 @@ function changeMes(which, dir){
   if(mesOffsets[key]+dir>0) return;
   mesOffsets[key]+=dir;
   if(which==='diners') renderDiners();
-  else renderInter();
+  else if(which==='inter') renderInter();
+  else if(which==='signature') renderSignature();
 }
 
 // ── RENDER DINERS ──────────────────────────────────────────
@@ -1338,6 +1443,118 @@ function renderInter(){
   }).join(''):`<div class="empty">Sin movimientos este mes</div>`;
 }
 
+// ── RENDER SIGNATURE ─────────────────────────────────────
+function renderSignature(){
+  const off=mesOffsets.signature;
+  const {start,end,label}=getMonthBounds(off);
+  const now=new Date();
+
+  document.getElementById('mes-label-sig').textContent=label;
+  document.getElementById('next-sig').disabled=off>=0;
+
+  function parseMontoSig(r){
+    const raw=String(r['Monto']||r['monto']||'0').trim().replace(',','.');
+    return parseFloat(raw)||0;
+  }
+
+  const mesRec=allSig.filter(r=>{
+    const d=parseDate(r['Fecha']);
+    return d&&d>=start&&d<=end;
+  });
+
+  const sumMes=mesRec.reduce((a,r)=>a+parseMontoSig(r),0);
+
+  // Hero
+  document.getElementById('total-amt-sig').innerHTML=`<sup>S/</sup> ${fmt(sumMes)}`;
+  document.getElementById('mes-info-sig').textContent=label;
+  const totalDays=(end-start)/86400000;
+  const daysIn=Math.max(0,(now-start)/86400000);
+  const pct=Math.min(100,(daysIn/totalDays)*100);
+  document.getElementById('mes-bar-sig').style.width=pct+'%';
+  document.getElementById('mes-end-sig').textContent=`fin del mes`;
+  const daysLeft=Math.max(0,Math.ceil((end-now)/86400000));
+  document.getElementById('mes-badge-sig').textContent=`${daysLeft}d restantes`;
+
+  // Stats
+  document.getElementById('total-sig-mes').textContent=`S/ ${fmt(sumMes)}`;
+  document.getElementById('count-sig-mes').textContent=`${mesRec.length} tx`;
+
+  // Moneda principal
+  const monedaMap={};
+  mesRec.forEach(r=>{ const m=r['Moneda']||'PEN'; monedaMap[m]=(monedaMap[m]||0)+1; });
+  const topMoneda=Object.entries(monedaMap).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById('moneda-sig-mes').textContent=topMoneda?topMoneda[0]:'—';
+  document.getElementById('count-sig-moneda').textContent=topMoneda?`${topMoneda[1]} tx`:'—';
+
+  // Monthly chart
+  const monthlyD=[];
+  for(let i=-5;i<=0;i++){
+    const b=getMonthBounds(i);
+    const recs=allSig.filter(r=>{ const d=parseDate(r['Fecha']); return d&&d>=b.start&&d<=b.end; });
+    monthlyD.push({label:MONTHS[b.start.getMonth()], val:recs.reduce((a,r)=>a+parseMontoSig(r),0)});
+  }
+  destroyChart('sMonthly');
+  const ctx1=document.getElementById('chart-sig-monthly');
+  charts.sMonthly=new Chart(ctx1,{
+    type:'bar',
+    data:{
+      labels:monthlyD.map(d=>d.label),
+      datasets:[{data:monthlyD.map(d=>d.val),backgroundColor:'rgba(14,165,160,0.2)',borderColor:'#0ea5a0',borderWidth:2,borderRadius:8}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{grid:{display:false},ticks:{color:'#9b9bb8',font:{size:11}}},
+              y:{grid:{color:'#f0f2ff'},ticks:{color:'#9b9bb8',font:{size:11},callback:v=>'S/'+v}}}}
+  });
+
+  // Pie moneda
+  const bySoles=mesRec.filter(r=>(r['Moneda']||'PEN')!=='USD').reduce((a,r)=>a+parseMontoSig(r),0);
+  const byUSD=mesRec.filter(r=>r['Moneda']==='USD').reduce((a,r)=>a+parseMontoSig(r),0);
+  destroyChart('sPie');
+  const ctx2=document.getElementById('chart-sig-pie');
+  if(sumMes>0){
+    charts.sPie=new Chart(ctx2,{type:'doughnut',data:{labels:['PEN','USD'],datasets:[{data:[bySoles,byUSD],backgroundColor:['#0ea5a0','#2ec4b6'],borderColor:'white',borderWidth:3}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{display:false}}}});
+  }
+  document.getElementById('pie-sig-labels').innerHTML=[
+    {label:'Soles (PEN)',val:bySoles,color:'#0ea5a0'},
+    {label:'USD',val:byUSD,color:'#2ec4b6'}
+  ].filter(x=>x.val>0).map(x=>`
+    <div class="pie-label-item">
+      <div class="pie-label-left"><div class="legend-dot" style="background:${x.color}"></div>${x.label}</div>
+      <div class="pie-label-amt" style="color:${x.color}">S/${fmt(x.val)}</div>
+    </div>`).join('');
+
+  // Top comercios
+  const comMap={};
+  mesRec.forEach(r=>{ const k=(r['Comercio']||'?').toUpperCase().trim().slice(0,28); comMap[k]=(comMap[k]||0)+parseMontoSig(r); });
+  const top=Object.entries(comMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const maxV=top[0]?.[1]||1;
+  document.getElementById('top-sig').innerHTML=top.length?top.map(([n,v],i)=>`
+    <div class="comercio-row">
+      <div class="comercio-num">#${i+1}</div>
+      <div class="comercio-name">${n}</div>
+      <div class="comercio-bar-bg"><div class="comercio-bar-fill" style="width:${(v/maxV*100).toFixed(0)}%;background:linear-gradient(90deg,#0ea5a0,#2ec4b6)"></div></div>
+      <div class="comercio-amt" style="color:#0ea5a0">S/${fmt(v)}</div>
+    </div>`).join(''):`<div class="empty">Sin datos este mes</div>`;
+
+  // Transactions
+  const sorted=[...mesRec].sort((a,b)=>(b['Fecha']||'')>(a['Fecha']||'')?1:-1).slice(0,25);
+  document.getElementById('tx-sig').innerHTML=sorted.length?sorted.map(r=>{
+    const com=(r['Comercio']||r['descripción']||'—').slice(0,32);
+    const ini=com.trim()[0]||'?';
+    const monto=parseMontoSig(r);
+    const fecha=(r['Fecha']||'—').slice(0,10);
+    return `<div class="tx-item">
+      <div class="tx-avatar signature">${ini}</div>
+      <div class="tx-info">
+        <div class="tx-name">${com}</div>
+        <div class="tx-date">${fecha} · ${r['Moneda']||'PEN'}</div>
+      </div>
+      <div class="tx-amount" style="color:#0ea5a0">S/ ${fmt(monto)}</div>
+    </div>`;
+  }).join(''):`<div class="empty">Sin movimientos este mes</div>`;
+}
+
 function destroyChart(k){ if(charts[k]){ try{charts[k].destroy();}catch(e){} delete charts[k]; } }
 
 // ── INIT ───────────────────────────────────────────────────
@@ -1363,15 +1580,22 @@ async function init(){
   }
 
   try{
-    [allDiners, allInter] = await Promise.all([
+    const fetches = [
       fetchTable(CFG.diners),
       fetchTable(CFG.inter)
-    ]);
-    console.log('[Init] Diners records:', allDiners.length, 'Inter records:', allInter.length);
+    ];
+    if(CFG.sig) fetches.push(fetchTable(CFG.sig));
+
+    const results = await Promise.all(fetches);
+    allDiners = results[0];
+    allInter = results[1];
+    allSig = results[2] || [];
+    console.log('[Init] Diners records:', allDiners.length, 'Inter records:', allInter.length, 'Sig records:', allSig.length);
     document.getElementById('loading-screen').style.display='none';
     document.getElementById('content').style.display='block';
     renderDiners();
     renderInter();
+    renderSignature();
     setTimeout(init, 5*60*1000);
   } catch(err){
     document.getElementById('loading-screen').innerHTML=`
